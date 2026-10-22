@@ -4,8 +4,8 @@
 |---|---|---|---|
 | eureka-server | 8761 | - | - |
 | api-gateway | 8080 | API-GATEWAY | - |
-| user-service | 8081 | USER-SERVICE | `user_service_db` |
-| order-service | 8082 | ORDER-SERVICE | `order_service_db` |
+| user-service | 8081 | USER-SERVICE | `test_microservices_user_db` |
+| order-service | 8082 | ORDER-SERVICE | `test_microservices_ordere_db` |
 
 **Versions:** Java 21, Spring Boot **3.4.5**, Spring Cloud **2024.0.1** (the release train that matches Boot 3.4.x).
 If you change Boot, change Spring Cloud with it: https://spring.io/projects/spring-cloud#overview
@@ -35,9 +35,9 @@ Eureka is only a registry; the **gateway** forwards the traffic.
 
 | Variable | Default |
 |---|---|
-| `DB_USERNAME` | `root` |
+| `DB_USERNAME` | `postgres` |
 | `DB_PASSWORD` | *(empty)* - **set this to your MySQL password** |
-| `DB_HOST` / `DB_PORT` | `localhost` / `3306` |
+| `DB_HOST` / `DB_PORT` | `localhost` / `5432` |
 
 Databases are created automatically (`createDatabaseIfNotExist=true`).
 
@@ -46,6 +46,7 @@ Databases are created automatically (`createDatabaseIfNotExist=true`).
 2. `user-service`
 3. `order-service`
 4. `api-gateway`
+5. `notification-service`
 
 Each: `cd <folder> && mvn spring-boot:run` (or run the `*Application` class in IntelliJ).
 Wait ~30 s; the Eureka dashboard should list **API-GATEWAY, USER-SERVICE, ORDER-SERVICE** as UP.

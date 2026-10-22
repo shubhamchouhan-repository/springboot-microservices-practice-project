@@ -5,9 +5,10 @@
 | eureka-server | 8761 | - | - |
 | api-gateway | 8080 | API-GATEWAY | - |
 | user-service | 8081 | USER-SERVICE | `test_microservices_user_db` |
-| order-service | 8082 | ORDER-SERVICE | `test_microservices_ordere_db` |
+| order-service | 8082 | ORDER-SERVICE | `test_microservices_order_db` |
+| notification-service | 8083 | NOTIFICATION-SERVICE | - |
 
-**Versions:** Java 21, Spring Boot **3.4.5**, Spring Cloud **2024.0.1** (the release train that matches Boot 3.4.x).
+**Versions:** Java 17, Spring Boot **3.4.5**, Spring Cloud **2024.0.1** (the release train that matches Boot 3.4.x).
 If you change Boot, change Spring Cloud with it: https://spring.io/projects/spring-cloud#overview
 
 ## Architecture
@@ -30,7 +31,7 @@ Request flow: `Postman -> Gateway(8080) -> asks Eureka where USER-SERVICE is -> 
 Eureka is only a registry; the **gateway** forwards the traffic.
 
 ## Prerequisites
-- JDK 21, Maven 3.9+ (or let IntelliJ import each `pom.xml`), MySQL 8 running on localhost:3306
+- JDK 17, Maven 3.9+ (or let IntelliJ import each `pom.xml`), PostgreSQL 17 running on localhost:5432
 - Environment variables (set them in IntelliJ Run Configuration for user-service and order-service):
 
 | Variable | Default |

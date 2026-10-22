@@ -1,0 +1,38 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: notification-service
+
+  kafka:
+    # Use kafka:9092 when notification-service
+    # and Kafka run in the same Docker Compose network.
+    bootstrap-servers: kafka:9092
+
+    consumer:
+      # Consumer group for notification processing
+      group-id: notification-group
+
+      # Read from the beginning when no committed offset exists
+      auto-offset-reset: earliest
+
+      # Deserialize Kafka message keys as Strings
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+      # Deserialize JSON messages into OrderPlacedEvent
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+      properties:
+        spring.json.value.default.type: com.example.notificationservice.event.OrderPlacedEvent
+        spring.json.trusted.packages: com.example.notificationservice.event
+        spring.json.use.type.headers: false
+
+
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+

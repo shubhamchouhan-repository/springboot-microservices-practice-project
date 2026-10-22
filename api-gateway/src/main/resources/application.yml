@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          # false = only our explicit routes below are exposed.
+          # true  = gateway would also auto-create /USER-SERVICE/** style routes for every registered service.
+          enabled: false
+      routes:
+        - id: user-service-route
+          uri: lb://USER-SERVICE          # lb:// = look up in Eureka + load balance
+          predicates:
+            - Path=/api/users/**
+        - id: order-service-route
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/api/orders/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [API-GATEWAY] %-5level %logger{30} - %msg%n"
+  level:
+    org.springframework.cloud.gateway: INFO

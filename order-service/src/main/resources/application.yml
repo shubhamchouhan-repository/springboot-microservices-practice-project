@@ -1,0 +1,115 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: ORDER-SERVICE
+  datasource:
+    # Own isolated database: order_service_db (created automatically if missing)
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/test_microservice_demo_order_db
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:root}   # no default on purpose: set the DB_PASSWORD environment variable
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 2000   # ms to establish the connection
+            readTimeout: 3000      # ms to wait for the response
+
+  kafka:
+    # Kafka external listener for applications running on your local machine
+    bootstrap-servers: localhost:9094
+
+    producer:
+      # Serialize Kafka message keys as Strings
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+      # Serialize Java event objects into JSON
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [ORDER-SERVICE:8082] %-5level %logger{30} - %msg%n"
+  level:
+    com.example.orderservice: INFO
+
+
+# Resilience4j configuration for USER-SERVICE calls
+resilience4j:
+
+  # 1. RETRY
+  retry:
+    instances:
+      userService:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+
+        # Retry only temporary/server availability errors.
+        retryExceptions:
+          - com.example.orderservice.exception.ServiceUnavailableException
+          - org.springframework.web.reactive.function.client.WebClientRequestException
+
+        # A missing user is a business error, not a temporary failure.
+        ignoreExceptions:
+          - com.example.orderservice.exception.UserNotFoundException
+
+  # 2. CIRCUIT BREAKER
+  circuitbreaker:
+    instances:
+      userService:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        ignoreExceptions:
+          - com.example.orderservice.exception.UserNotFoundException
+  # 3. RATE LIMITER
+  ratelimiter:
+    instances:
+      orderDetails:
+        limitForPeriod: 3
+        limitRefreshPeriod: 10s
+        timeoutDuration: 0
+
+# Expose health and metrics endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+
+
+
+
+#  Setting	                    Meaning
+#maxAttempts: 3	                One initial call and up to two retries.
+#waitDuration: 1s	            Initial retry delay is one second.
+#Exponential backoff	            Subsequent retry delays increase.
+#failureRateThreshold: 50        Circuit can open when at least half of the measured calls fail.
+#minimumNumberOfCalls: 5	        At least five recorded calls are needed before evaluating the failure rate.
+#waitDurationInOpenState: 10s	Wait ten seconds before allowing a recovery test.
+#Half-open calls: 3	            Allow three trial calls to test whether USER-SERVICE recovered.

@@ -1,0 +1,14 @@
+# Git files
+.git
+.gitignore
+
+# IntelliJ IDEA
+.idea
+*.iml
+
+# Maven build output
+target/
+
+# Logs
+*.log
+logs/
